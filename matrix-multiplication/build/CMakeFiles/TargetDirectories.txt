@@ -1,5 +1,0 @@
-/home/hvpubudu/nomp/examples/matrix-multiplication/build/CMakeFiles/ocl-matrix-mul.dir
-/home/hvpubudu/nomp/examples/matrix-multiplication/build/CMakeFiles/omp-matrix-mul.dir
-/home/hvpubudu/nomp/examples/matrix-multiplication/build/CMakeFiles/sycl-matrix-mul.dir
-/home/hvpubudu/nomp/examples/matrix-multiplication/build/CMakeFiles/edit_cache.dir
-/home/hvpubudu/nomp/examples/matrix-multiplication/build/CMakeFiles/rebuild_cache.dir
