@@ -1,0 +1,1 @@
+/opt/intel/oneapi/compiler/2023.0.0/linux/bin/icpx  -fsycl   -fsycl  CMakeFiles/sycl-matrix-mul.dir/sycl.cpp.o -o sycl-matrix-mul  -fsycl 

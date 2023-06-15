@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/ocl-matrix-mul.dir/opencl.c.o -o ocl-matrix-mul  /usr/lib/x86_64-linux-gnu/libOpenCL.so 
