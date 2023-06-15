@@ -1,1 +1,8 @@
-{"kernels":  [{"key": 1, "value": "Vector Addition"}, {"key": 2, "value": "Vector Reduction"}, {"key": 3, "value": "Calculate Pi"}, {"key": 4, "value": "Matrix Multiplication"}]}
+{
+  "kernels": [
+    { "key": 1, "value": "Vector Addition" },
+    { "key": 2, "value": "Vector Reduction" },
+    { "key": 3, "value": "Calculate Pi" },
+    { "key": 4, "value": "Matrix Multiplication" }
+  ]
+}
