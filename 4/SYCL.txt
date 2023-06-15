@@ -1,0 +1,75 @@
+#include <CL/sycl.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define LOCAL_SIZE 16
+
+int main(int argc, char *argv[]) {
+  unsigned height_a = (argc > 1 ? atoi(argv[1]) : 500);
+  unsigned width_a = (argc > 2 ? atoi(argv[2]) : 110);
+  unsigned width_b = (argc > 3 ? atoi(argv[3]) : 220);
+  unsigned trials = (argc > 4 ? atoi(argv[4]) : 1000);
+
+  sycl::device device{sycl::gpu_selector_v};
+  sycl::context context = sycl::context(device);
+  sycl::queue queue = sycl::queue(context, device);
+
+  double *h_a = (double *)calloc(height_a * width_a, sizeof(double));
+  double *h_b = (double *)calloc(width_b * width_a, sizeof(double));
+  double *h_c = (double *)calloc(width_b * height_a, sizeof(double));
+
+  for (unsigned i = 0; i < height_a * width_a; i++)
+    h_a[i] = rand() % 256;
+
+  for (unsigned i = 0; i < width_a * width_b; i++)
+    h_b[i] = rand() % 256;
+
+  unsigned grid_rows = ((height_a + LOCAL_SIZE - 1) / LOCAL_SIZE) * LOCAL_SIZE;
+  unsigned grid_cols = ((width_b + LOCAL_SIZE - 1) / LOCAL_SIZE) * LOCAL_SIZE;
+  sycl::range local_size = sycl::range(LOCAL_SIZE, LOCAL_SIZE);
+  sycl::range global_size = sycl::range(grid_cols, grid_rows);
+
+  sycl::buffer a_buf{h_a, sycl::range<1>(height_a * width_a)};
+  sycl::buffer b_buf{h_b, sycl::range<1>(width_a * width_b)};
+  sycl::buffer c_buf{h_c, sycl::range<1>(height_a * width_b)};
+
+  clock_t t = clock();
+
+  for (unsigned t = 0; t < trials; t++) {
+    queue.submit([&](sycl::handler &h) {
+      auto d_a = a_buf.get_access<sycl::access::mode::read>(h);
+      auto d_b = b_buf.get_access<sycl::access::mode::read>(h);
+      auto d_c = c_buf.get_access<sycl::access::mode::read_write>(h);
+
+      h.parallel_for(sycl::nd_range(global_size, local_size), [=](auto item) {
+        int col = item.get_global_id(0);
+        int row = item.get_global_id(1);
+        double dot = 0;
+        if (col < width_b && row < height_a) {
+          for (int i = 0; i < width_a; i++)
+            dot += d_a[width_a * row + i] * d_b[width_b * i + col];
+          d_c[width_b * row + col] = dot;
+        }
+      });
+    });
+  }
+  queue.wait();
+  t = clock() - t;
+
+  c_buf.get_access<sycl::access::mode::read>();
+  for (unsigned i = 0; i < height_a; i++) {
+    for (unsigned j = 0; j < width_b; j++) {
+      double dot = 0;
+      for (unsigned k = 0; k < width_a; k++)
+        dot += h_a[i * width_a + k] * h_b[k * width_b + j];
+      assert(fabs(h_c[i * width_b + j] - dot) < 1e-12);
+    }
+  }
+
+  printf("N: %u local:(%lu,%lu) global:(%lu,%lu) time: %e\n",
+         height_a * width_b * width_a, local_size[0], local_size[1],
+         global_size[0], global_size[1], (double)t / (CLOCKS_PER_SEC * trials));
+
+  free(h_a), free(h_b), free(h_c);
+}

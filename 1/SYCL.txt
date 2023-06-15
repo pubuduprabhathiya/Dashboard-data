@@ -1,0 +1,62 @@
+#include <CL/sycl.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(int argc, char *argv[]) {
+  unsigned N = (argc > 1 ? atoi(argv[1]) : 1000000);
+  unsigned trials = (argc > 2 ? atoi(argv[2]) : 1000);
+
+  size_t bytes = N * sizeof(float);
+
+  // Number of work items in each local work group
+  size_t local_size = 256;
+
+  // Number of total work items - local_size must be devisor
+  size_t global_size = ((N + local_size - 1) / local_size) * local_size;
+
+  sycl::device device{sycl::gpu_selector_v};
+  sycl::context context = sycl::context(device);
+  sycl::queue queue = sycl::queue(context, device);
+
+  float *h_a = (float *)calloc(N, sizeof(float));
+  float *h_b = (float *)calloc(N, sizeof(float));
+  float *h_c = (float *)calloc(N, sizeof(float));
+
+  for (unsigned i = 0; i < N; i++)
+    h_a[i] = i + 1.0, h_b[i] = N - i - 1.0;
+
+  sycl::buffer a_buf{h_a, sycl::range<1>(N)};
+  sycl::buffer b_buf{h_b, sycl::range<1>(N)};
+  sycl::buffer c_buf{h_c, sycl::range<1>(N)};
+
+  clock_t t = clock();
+
+  for (unsigned t = 0; t < trials; t++) {
+    queue.submit([&](sycl::handler &h) {
+      auto d_a = a_buf.get_access<sycl::access::mode::read>(h);
+      auto d_b = b_buf.get_access<sycl::access::mode::read>(h);
+      auto d_c = c_buf.get_access<sycl::access::mode::read_write>(h);
+
+      h.parallel_for(
+          sycl::nd_range(sycl::range(global_size), sycl::range(local_size)),
+          [=](auto item) {
+            unsigned id = item.get_global_id(0);
+            if (id < N)
+              d_c[id] = d_a[id] + d_b[id];
+          });
+    });
+  }
+  queue.wait();
+  c_buf.get_access<sycl::access::mode::read>();
+
+  t = clock() - t;
+
+  printf("N: %u local: %lu global: %lu time: %e\n", N, local_size, global_size,
+         (double)t / (CLOCKS_PER_SEC * trials));
+  for (unsigned i = 0; i < N; i++) {
+    assert(fabs(h_c[i] - N) < 1e-8);
+  }
+
+  free(h_a), free(h_b), free(h_c);
+}
