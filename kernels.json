@@ -1,8 +1,8 @@
 {
   "kernels": [
-    { "key": 1, "value": "Vector Addition" },
-    { "key": 2, "value": "Vector Reduction" },
-    { "key": 3, "value": "Calculate Pi" },
-    { "key": 4, "value": "Matrix Multiplication" }
+    { "key": 1, "value": "Vector Addition" ,"kernelDataPath":"1" },
+    { "key": 2, "value": "Vector Reduction","kernelDataPath":"2" },
+    { "key": 3, "value": "Calculate Pi","kernelDataPath":"3" },
+    { "key": 4, "value": "Matrix Multiplication","kernelDataPath":"4" }
   ]
 }
