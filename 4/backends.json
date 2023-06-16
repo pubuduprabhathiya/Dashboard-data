@@ -1,0 +1,8 @@
+{
+  "backends": [
+    { "key": 1, "value": "Opencl" },
+    { "key": 2, "value": "Cuda" },
+    { "key": 4, "value": "HIP" },
+    { "key": 5, "value": "ISPC" }
+  ]
+}
