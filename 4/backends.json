@@ -1,8 +1,9 @@
 {
   "backends": [
-    { "key": 1, "value": "Opencl" },
-    { "key": 2, "value": "Cuda" },
-    { "key": 4, "value": "HIP" },
-    { "key": 5, "value": "ISPC" }
+    { "key": 1, "value": "Opencl","codePath":"4","file":"Opencl.txt"},
+    { "key": 2, "value": "Cuda" ,"codePath":"4","file":"Cuda.txt"},
+    { "key": 3, "value": "SYCL" ,"codePath":"4","file":"SYCL.txt"},
+    { "key": 4, "value": "HIP" ,"codePath":"4","file":"HIP.txt"},
+    { "key": 5, "value": "ISPC" ,"codePath":"4","file":"ISPC.txt"}
   ]
 }
